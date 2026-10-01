@@ -1,0 +1,37 @@
+## JEV Flight Lab — complete
+
+Built the full prototype from a specs-only repo into a working Next.js app.
+
+### 1. What was built
+- Neon Canvas drone game (physics, gates, collision, score, restart, particles)
+- `GameState → TacticalState` projection + provider abstraction
+- Mock autopilot + server-side Jev System One integration (`POST /api/jev/decision`)
+- Decision loop (async, cooldown, timeout, stale rejection, fallback)
+- UI: decision panel, telemetry, history/inspector, Autopilot / Manual / Lab
+- Optional Flight Analyst (`POST /api/analyst`)
+
+### 2. Validation
+- `npm run lint` — passed
+- `npm run build` — passed
+- Runtime: page `200`, decision API works, invalid body `400`, analyst responds, no secrets in client bundle
+- Artifacts: `.autopilot/COMPLETE.json`, `.autopilot/STATUS.md`
+
+### 3. Jev status
+Architecture is live-ready against `https://thejevai.com/v1/systemone`.  
+**Active now: DEMO MODE / MOCK JEV** (no `JEV_API_KEY`). Set `AI_PROVIDER=jev` + `JEV_API_KEY` for real Jev.
+
+### 4. LLM analyst status
+Implemented; **local heuristic** until `LLM_API_KEY` is set. Never controls the drone.
+
+### 5. Limitations
+No e2e browser suite; live Jev/LLM need credentials; physics tuned for demo feel.
+
+### 6. How to run
+```bash
+npm install
+cp .env.example .env.local
+npm run dev
+```
+Open http://localhost:3000Scaffold finished successfully and the app was built from it.
+
+The temporary production server on port 3456 was stopped after API checks (`/` `200`, mock Jev decisions, analyst OK). That exit is expected, not a build failure — lint/build already passed and `.autopilot/COMPLETE.json` is in place.

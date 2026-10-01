@@ -1,0 +1,32 @@
+npm notice run jev-flight-lab@0.1.0 build
+npm notice run next build
+   ▲ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+   Generating static pages (0/8) ...
+   Generating static pages (2/8) 
+   Generating static pages (4/8) 
+   Generating static pages (6/8) 
+ ✓ Generating static pages (8/8)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                              Size     First Load JS
+┌ ○ /                                    10.5 kB         116 kB
+├ ○ /_not-found                          979 B           106 kB
+├ ƒ /api/analyst                         141 B           105 kB
+├ ƒ /api/jev/decision                    141 B           105 kB
+└ ƒ /api/status                          141 B           105 kB
++ First Load JS shared by all            105 kB
+  ├ chunks/4bd1b696-fd4c7e7db1108dbc.js  52.9 kB
+  ├ chunks/517-64eaf24f06697c85.js       50.5 kB
+  └ other shared chunks (total)          1.88 kB
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

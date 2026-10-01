@@ -1,0 +1,27 @@
+**Verdict:** Previously marked complete too early. Gaps found and fixed; acceptance criteria now pass.
+
+### Issues found vs prior claim
+- Stale async decisions could clear `inFlight` while a newer request was active
+- Client forced `provider: "jev"` even when the server returned mock
+- Fallback fabricated probabilities/confidence
+- Manual mode lacked AGREEMENT / DIFFERENT DECISION
+- Offline copy did not match `JEV OFFLINE` / `FALLBACK CONTROLLER ACTIVE`
+- `.env.example` was gitignored by `.env*`
+- No unit tests (shell `TESTS=passed` only because no test script existed)
+
+### Fixes + proof
+| Check | Result |
+|---|---|
+| `npm run lint` | passed |
+| `npm run build` | passed |
+| `npm test` | **15/15 passed** |
+| `GET /` | HTTP 200 |
+| `POST /api/jev/decision` | mock OK |
+| invalid body | HTTP 400 |
+| client secret scan | clean |
+
+### Completion artifacts
+- `.autopilot/COMPLETE.json` — written after re-validation
+- `.autopilot/STATUS.md` — updated with QA notes and how to run
+
+Currently running **DEMO MODE / MOCK JEV** (no `JEV_API_KEY`). Set `AI_PROVIDER=jev` + `JEV_API_KEY` for live Jev; credentials stay server-side.
