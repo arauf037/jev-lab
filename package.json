@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "tsx --test src/lib/game/game.test.ts src/lib/ai/ai.test.ts src/lib/ai/controlLoop.test.ts src/lib/ai/jevServer.test.ts"
+    "test": "tsx --test src/lib/game/game.test.ts src/lib/ai/ai.test.ts src/lib/ai/controlLoop.test.ts src/lib/ai/jevServer.test.ts src/lib/ai/providerCompare.test.ts"
   },
   "dependencies": {
     "@huggingface/transformers": "^4.3.0",

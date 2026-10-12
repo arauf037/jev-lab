@@ -8,14 +8,15 @@ interface ModeSelectorProps {
 }
 
 const MODES: { id: GameMode; label: string; hint: string }[] = [
-  { id: "autopilot", label: "Autopilot", hint: "Jev flies" },
+  { id: "autopilot", label: "Autopilot", hint: "Selected pilot flies" },
   { id: "manual", label: "Manual", hint: "Space to flap" },
   { id: "lab", label: "Lab", hint: "Paused inspect" },
+  { id: "compare", label: "Compare", hint: "Flights and replay" },
 ];
 
 export function ModeSelector({ mode, onChange }: ModeSelectorProps) {
   return (
-    <div className="grid grid-cols-3 gap-2">
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
       {MODES.map((item) => {
         const active = mode === item.id;
         return (

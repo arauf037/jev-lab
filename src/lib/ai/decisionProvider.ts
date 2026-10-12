@@ -1,4 +1,4 @@
-import type { TacticalAction, TacticalState } from "@/lib/game/types";
+import type { DecisionProviderName, TacticalAction, TacticalState } from "@/lib/game/types";
 
 export interface TacticalDecision {
   action: TacticalAction;
@@ -8,9 +8,15 @@ export interface TacticalDecision {
   };
   confidence?: number;
   latencyMs: number;
-  provider: "jev" | "mock" | "fallback" | "local";
+  provider: DecisionProviderName;
   timestamp: number;
   isFallback?: boolean;
+  model?: string;
+  inputTokens?: number;
+  outputTokens?: number;
+  totalTokens?: number;
+  estimatedCostUsd?: number;
+  reportedCostUsd?: number;
 }
 
 export interface TacticalDecisionProvider {

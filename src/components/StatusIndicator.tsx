@@ -5,11 +5,12 @@ import type { ProviderStatus } from "@/lib/ai/decisionManager";
 interface StatusIndicatorProps {
   status: ProviderStatus;
   demoMode: boolean;
-  providerLabel: "jev" | "mock";
+  providerLabel: "jev" | "openai" | "mock" | "laya";
   inFlight: boolean;
   lastError: string | null;
-  control?: "jev" | "mock" | "fallback" | "local";
+  control?: "jev" | "openai" | "mock" | "fallback" | "local" | "laya";
   localModel?: "loading" | "ready" | "unavailable";
+  openaiModel?: string;
 }
 
 export function StatusIndicator({
@@ -20,6 +21,7 @@ export function StatusIndicator({
   lastError,
   control = "mock",
   localModel = "loading",
+  openaiModel = "",
 }: StatusIndicatorProps) {
   const localActive = status === "fallback" && control === "local";
   const offline = (status === "fallback" || status === "error") && !localActive;
@@ -27,12 +29,20 @@ export function StatusIndicator({
   const label = localActive
     ? "LOCAL MODEL"
     : offline
-    ? "JEV OFFLINE"
-    : demoMode
-      ? "DEMO MODE / MOCK JEV"
-      : providerLabel === "jev"
-        ? "LIVE JEV"
-        : "MOCK JEV";
+      ? providerLabel === "openai"
+        ? "GPT OFFLINE"
+        : providerLabel === "laya"
+          ? "LAYA OFFLINE"
+          : "JEV OFFLINE"
+    : providerLabel === "openai"
+      ? "GPT PILOT"
+      : providerLabel === "laya"
+        ? "LAYA PILOT"
+        : demoMode
+          ? "DEMO MODE / MOCK JEV"
+          : providerLabel === "jev"
+            ? "LIVE JEV"
+            : "MOCK JEV";
 
   const tone = localActive
     ? "border-violet-300/40 text-violet-200"
@@ -46,8 +56,14 @@ export function StatusIndicator({
     <div className={`rounded-xl border px-3 py-2 text-xs ${tone} bg-black/30`}>
       <div className="font-semibold tracking-[0.16em]">{label}</div>
       <div className="mt-1 text-slate-300">
+        {providerLabel === "openai" && openaiModel ? `MODEL: ${openaiModel} · ` : ""}
+        {providerLabel === "laya" ? "MODEL: typed-decisions · " : ""}
         {localActive
-          ? "JEV TIMEOUT · LOCAL MODEL ACTIVE"
+          ? providerLabel === "openai"
+            ? "GPT TIMEOUT · LOCAL MODEL ACTIVE"
+            : providerLabel === "laya"
+              ? "LAYA TIMEOUT · LOCAL MODEL ACTIVE"
+              : "JEV TIMEOUT · LOCAL MODEL ACTIVE"
           : offline
           ? "FALLBACK CONTROLLER ACTIVE"
           : inFlight

@@ -18,6 +18,13 @@ export const GAME_CONFIG = {
   urgentDecisionIntervalMs: 40,
   /** Far from the next gate. Still shorter than a typical Jev reply, so the next call starts as soon as the last one lands. */
   calmDecisionIntervalMs: 100,
+  /**
+   * Floor for local GPU pilots (Laya). Spec targets ~150–300ms decisions;
+   * sub-100ms RTTs otherwise saturate the harness and stack flaps.
+   */
+  localPilotIntervalMs: 180,
+  /** Near a gate / fast fall, allow a faster local cadence than the calm floor. */
+  localPilotUrgentIntervalMs: 90,
   maxDecisionHistory: 20,
   canvasPadding: 24,
   defaultCanvasWidth: 900,
@@ -30,6 +37,12 @@ export const GAME_CONFIG = {
   maxDecisionAgeMs: 1000,
   /** Suppress a second flap impulse on top of one that just landed. */
   fallbackQuietMs: 280,
+  /** Lead projection floor for high-latency remote pilots (Jev / GPT). */
+  remoteLeadFloorMs: 200,
+  /** Lead projection floor for local GPU pilots whose RTT is tens of ms. */
+  localLeadFloorMs: 40,
+  /** Starting lead before the first measured RTT for local pilots. */
+  localLeadInitialMs: 80,
   analystIntervalMs: 10000,
 } as const;
 

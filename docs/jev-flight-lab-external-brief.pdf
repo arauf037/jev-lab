@@ -1,0 +1,194 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+2 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Oblique >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>
+endobj
+5 0 obj
+<< /Length 8140 >>
+stream
+BT /F2 18 Tf 0.055 0.455 0.565 rg 1 0 0 1 48.00 793.89 Tm (JEV Flight Lab) Tj ET
+BT /F1 8.5 Tf 0.280 0.330 0.410 rg 1 0 0 1 48.00 771.89 Tm (External brief ? game, agent harness, Jev I/O, execution, and limitations) Tj ET
+BT /F1 8.5 Tf 0.390 0.450 0.550 rg 1 0 0 1 48.00 758.89 Tm (Audience: external technical / product partners | Scope: prototype control-loop demo | Decision model: Jev) Tj ET
+BT /F1 8.5 Tf 0.390 0.450 0.550 rg 1 0 0 1 48.00 747.89 Tm (\(OpenRouter Decisions API\)) Tj ET
+BT /F2 12 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 730.89 Tm (1. What the product is) Tj ET
+0.8 0.84 0.88 RG 1 w 48.00 716.89 m 547.28 716.89 l S
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 708.89 Tm (JEV Flight Lab is a Flappy Bird-style 2D browser demo. A neon drone flies through gate openings.) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 696.39 Tm (The game engine owns physics, rendering, collisions, and scoring. Jev is not the game ? it is a) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 683.89 Tm (tactical decision service that only answers FLAP or WAIT.) Tj ET
+0.945 0.961 0.976 rg 48.00 652.89 499.28 22.50 re f
+0.055 0.455 0.565 rg 48.00 652.89 2.5 22.50 re f
+BT /F3 10 Tf 0.06 0.09 0.16 rg 1 0 0 1 56.00 667.39 Tm (Game state -> bounded AI decision -> action -> observable outcome) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 644.89 Tm (The demo shows a real-time control loop with a typed decision model, not chat-based "play the game) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 632.39 Tm (with prose.") Tj ET
+BT /F2 12 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 619.89 Tm (2. Architecture ? who owns what) Tj ET
+0.8 0.84 0.88 RG 1 w 48.00 605.89 m 547.28 605.89 l S
+0.945 0.961 0.976 rg 48.00 581.89 499.28 16.00 re f
+0.8 0.84 0.88 RG 0.8 w 48.00 581.89 499.28 16.00 re S
+BT /F2 8.5 Tf 0.06 0.09 0.16 rg 1 0 0 1 51.00 586.89 Tm (Layer) Tj ET
+BT /F2 8.5 Tf 0.06 0.09 0.16 rg 1 0 0 1 171.00 586.89 Tm (Owns) Tj ET
+BT /F2 8.5 Tf 0.06 0.09 0.16 rg 1 0 0 1 401.00 586.89 Tm (Does not own) Tj ET
+0.8 0.84 0.88 RG 0.8 w 48.00 564.89 499.28 17.00 re S
+0.8 0.84 0.88 RG 0.8 w 168.00 581.89 m 168.00 564.89 l S
+0.8 0.84 0.88 RG 0.8 w 398.00 581.89 m 398.00 564.89 l S
+BT /F1 8 Tf 0.06 0.09 0.16 rg 1 0 0 1 51.00 570.89 Tm (Game engine) Tj ET
+BT /F1 8 Tf 0.06 0.09 0.16 rg 1 0 0 1 171.00 570.89 Tm (Physics, gates, collisions, score, lifecycle) Tj ET
+BT /F1 8 Tf 0.06 0.09 0.16 rg 1 0 0 1 401.00 570.89 Tm (AI reasoning) Tj ET
+0.8 0.84 0.88 RG 0.8 w 48.00 536.89 499.28 28.00 re S
+0.8 0.84 0.88 RG 0.8 w 168.00 564.89 m 168.00 536.89 l S
+0.8 0.84 0.88 RG 0.8 w 398.00 564.89 m 398.00 536.89 l S
+BT /F1 8 Tf 0.06 0.09 0.16 rg 1 0 0 1 51.00 553.89 Tm (Harness \(DecisionManager\)) Tj ET
+BT /F1 8 Tf 0.06 0.09 0.16 rg 1 0 0 1 171.00 553.89 Tm (Cadence, timeout, stale checks, fallback,) Tj ET
+BT /F1 8 Tf 0.06 0.09 0.16 rg 1 0 0 1 171.00 542.89 Tm (apply/discard) Tj ET
+BT /F1 8 Tf 0.06 0.09 0.16 rg 1 0 0 1 401.00 553.89 Tm (Model weights) Tj ET
+0.8 0.84 0.88 RG 0.8 w 48.00 519.89 499.28 17.00 re S
+0.8 0.84 0.88 RG 0.8 w 168.00 536.89 m 168.00 519.89 l S
+0.8 0.84 0.88 RG 0.8 w 398.00 536.89 m 398.00 519.89 l S
+BT /F1 8 Tf 0.06 0.09 0.16 rg 1 0 0 1 51.00 525.89 Tm (Jev provider) Tj ET
+BT /F1 8 Tf 0.06 0.09 0.16 rg 1 0 0 1 171.00 525.89 Tm (Projects state, calls API, parses choice) Tj ET
+BT /F1 8 Tf 0.06 0.09 0.16 rg 1 0 0 1 401.00 525.89 Tm (Execution in the world) Tj ET
+0.8 0.84 0.88 RG 0.8 w 48.00 502.89 499.28 17.00 re S
+0.8 0.84 0.88 RG 0.8 w 168.00 519.89 m 168.00 502.89 l S
+0.8 0.84 0.88 RG 0.8 w 398.00 519.89 m 398.00 502.89 l S
+BT /F1 8 Tf 0.06 0.09 0.16 rg 1 0 0 1 51.00 508.89 Tm (Optional LLM analyst) Tj ET
+BT /F1 8 Tf 0.06 0.09 0.16 rg 1 0 0 1 171.00 508.89 Tm (Slow strategic commentary \(~10s\)) Tj ET
+BT /F1 8 Tf 0.06 0.09 0.16 rg 1 0 0 1 401.00 508.89 Tm (Per-tick control) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 496.89 Tm (Critical split: Jev decides; the harness decides whether that answer is still safe to apply; the) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 484.39 Tm (engine applies a single physics impulse if allowed.) Tj ET
+BT /F2 12 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 471.89 Tm (3. End-to-end control loop) Tj ET
+0.8 0.84 0.88 RG 1 w 48.00 457.89 m 547.28 457.89 l S
+0.043 0.071 0.125 rg 48.00 311.89 499.28 142.00 re f
+BT /F4 8 Tf 0.89 0.91 0.94 rg 1 0 0 1 56.00 443.89 Tm (Animation frame \(~60fps\)) Tj ET
+BT /F4 8 Tf 0.89 0.91 0.94 rg 1 0 0 1 56.00 433.89 Tm (  -> engine.update\(physics\)) Tj ET
+BT /F4 8 Tf 0.89 0.91 0.94 rg 1 0 0 1 56.00 423.89 Tm (  -> build TacticalState from live pose) Tj ET
+BT /F4 8 Tf 0.89 0.91 0.94 rg 1 0 0 1 56.00 413.89 Tm (  -> DecisionManager.sync\(session, state\)) Tj ET
+BT /F4 8 Tf 0.89 0.91 0.94 rg 1 0 0 1 56.00 403.89 Tm (  -> maybeRequest\(\) if interval elapsed & no in-flight call) Tj ET
+BT /F4 8 Tf 0.89 0.91 0.94 rg 1 0 0 1 56.00 393.89 Tm (       -> project state by ~latency lead) Tj ET
+BT /F4 8 Tf 0.89 0.91 0.94 rg 1 0 0 1 56.00 383.89 Tm (       -> POST /api/jev/decision  { state }) Tj ET
+BT /F4 8 Tf 0.89 0.91 0.94 rg 1 0 0 1 56.00 373.89 Tm (       -> server builds Decisions API payload) Tj ET
+BT /F4 8 Tf 0.89 0.91 0.94 rg 1 0 0 1 56.00 363.89 Tm (       -> OpenRouter Jev returns choice flap|wait) Tj ET
+BT /F4 8 Tf 0.89 0.91 0.94 rg 1 0 0 1 56.00 353.89 Tm (  -> harness validates age / relevance / session) Tj ET
+BT /F4 8 Tf 0.89 0.91 0.94 rg 1 0 0 1 56.00 343.89 Tm (  -> if flap + autopilot + still valid -> engine.dispatch\(FLAP\)) Tj ET
+BT /F4 8 Tf 0.89 0.91 0.94 rg 1 0 0 1 56.00 333.89 Tm (       -> velocityY = flapImpulse \(one bounded hop\)) Tj ET
+BT /F4 8 Tf 0.89 0.91 0.94 rg 1 0 0 1 56.00 323.89 Tm (  -> if wait -> do nothing \(gravity continues\)) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 303.89 Tm (Cadence is adaptive \(~40-100 ms target poll\), but only one request is in flight, so real rate is) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 291.39 Tm (bounded by network RTT. Client timeout: 1 s. Max decision age: 1 s.) Tj ET
+BT /F2 12 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 278.89 Tm (4. State sent to Jev) Tj ET
+0.8 0.84 0.88 RG 1 w 48.00 264.89 m 547.28 264.89 l S
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 256.89 Tm (Browser -> Next.js route -> OpenRouter. Telemetry is a projected snapshot \(lead ~ recent latency,) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 244.39 Tm (~200-1000 ms\) so Jev answers for near-future pose, not already-stale past.) Tj ET
+BT /F2 10.5 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 229.89 Tm (Numeric telemetry) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 56.00 215.89 Tm (- altitude, verticalVelocity, horizontalVelocity) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 56.00 203.39 Tm (- nextGateDistance, gapCenterY, gapSize, relativeGapOffset) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 56.00 190.89 Tm (- recentFlaps, timeSinceLastFlapMs, droneAlive) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 56.00 178.39 Tm (- timeToGateMs, predictedOffsetAtGate, gapMargin) Tj ET
+BT /F2 10.5 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 163.89 Tm (Structured prompt fields) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 56.00 149.89 Tm (- task ? fly through openings; trust ifYouWait; do not invent extra prediction) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 56.00 137.39 Tm (- ifYouWait ? natural-language forecast if WAIT continues) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 56.00 124.89 Tm (- oneFlap ? natural-language climb of one flap vs opening height) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 56.00 112.39 Tm (- questions.action ? choice with explicit flap/wait criteria) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 99.89 Tm (Jev is asked for a typed choice, not an explanation.) Tj ET
+BT /F2 12 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 87.39 Tm (5. How Jev processes and returns output) Tj ET
+0.8 0.84 0.88 RG 1 w 48.00 73.39 m 547.28 73.39 l S
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 52.00 65.39 Tm (1. Server builds OpenRouter Decisions API body \(default model typesafe/jev-1.13\).) Tj ET
+BT /F3 8 Tf 0.39 0.45 0.55 rg 1 0 0 1 277.64 28 Tm (Page 1/2) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Length 6209 >>
+stream
+BT /F3 8 Tf 0.39 0.45 0.55 rg 48.00 807.89 Td (JEV Flight Lab ? External Brief) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 52.00 793.89 Tm (2. Jev returns answers.action.choice = "flap" | "wait", optional probabilities / confidence /) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 52.00 781.39 Tm (usage.) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 52.00 768.89 Tm (3. Server maps that to TacticalDecision and returns JSON to the browser.) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 52.00 756.39 Tm (4. Invalid choice / HTTP failure -> harness backup \(local model or deterministic heuristic\),) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 52.00 743.89 Tm (labeled fallback/local, never as live Jev.) Tj ET
+BT /F2 12 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 731.39 Tm (6. How the agent executes the output) Tj ET
+0.8 0.84 0.88 RG 1 w 48.00 717.39 m 547.28 717.39 l S
+0.945 0.961 0.976 rg 48.00 693.39 499.28 16.00 re f
+0.8 0.84 0.88 RG 0.8 w 48.00 693.39 499.28 16.00 re S
+BT /F2 8.5 Tf 0.06 0.09 0.16 rg 1 0 0 1 51.00 698.39 Tm (Answer) Tj ET
+BT /F2 8.5 Tf 0.06 0.09 0.16 rg 1 0 0 1 121.00 698.39 Tm (Execution) Tj ET
+0.8 0.84 0.88 RG 0.8 w 48.00 676.39 499.28 17.00 re S
+0.8 0.84 0.88 RG 0.8 w 118.00 693.39 m 118.00 676.39 l S
+BT /F1 8 Tf 0.06 0.09 0.16 rg 1 0 0 1 51.00 682.39 Tm (wait) Tj ET
+BT /F1 8 Tf 0.06 0.09 0.16 rg 1 0 0 1 121.00 682.39 Tm (No control action; gravity keeps acting) Tj ET
+0.8 0.84 0.88 RG 0.8 w 48.00 659.39 499.28 17.00 re S
+0.8 0.84 0.88 RG 0.8 w 118.00 676.39 m 118.00 659.39 l S
+BT /F1 8 Tf 0.06 0.09 0.16 rg 1 0 0 1 51.00 665.39 Tm (flap) Tj ET
+BT /F1 8 Tf 0.06 0.09 0.16 rg 1 0 0 1 121.00 665.39 Tm (If still valid under harness rules -> FLAP -> sets velocityY = flapImpulse once) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 653.39 Tm (The harness may discard even a "correct" Jev flap when:) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 56.00 640.89 Tm (- decision age > 1 s \(too_old\)) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 56.00 628.39 Tm (- drone already above the opening enough that a flap would climb into the pipe \(above_opening\)) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 56.00 615.89 Tm (- a second impulse too soon after another flap \(second_flap, ~280 ms quiet window\)) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 56.00 603.39 Tm (- response belongs to a previous flight/session \(previous_flight / replaced\)) Tj ET
+BT /F1 10 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 590.89 Tm (Model output != world action. The harness is the safety / relevance gate.) Tj ET
+BT /F2 12 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 578.39 Tm (7. Key limitations and challenges) Tj ET
+0.8 0.84 0.88 RG 1 w 48.00 564.39 m 547.28 564.39 l S
+BT /F1 10 Tf 0.420 0.170 0.070 rg 1 0 0 1 52.00 556.39 Tm (- Latency vs game speed. Gates close in seconds; Jev RTT is often hundreds of ms. Mitigation: state) Tj ET
+BT /F1 10 Tf 0.420 0.170 0.070 rg 1 0 0 1 52.00 543.89 Tm (projection + stale discard ? projection is approximate, not a full simulator inside Jev.) Tj ET
+BT /F1 10 Tf 0.420 0.170 0.070 rg 1 0 0 1 52.00 531.39 Tm (- Binary, myopic action space. Only flap/wait for the current opening. No multi-gate planning,) Tj ET
+BT /F1 10 Tf 0.420 0.170 0.070 rg 1 0 0 1 52.00 518.89 Tm (thrust magnitude, or continuous control.) Tj ET
+BT /F1 10 Tf 0.420 0.170 0.070 rg 1 0 0 1 52.00 506.39 Tm (- Prompted heuristics in the loop. ifYouWait / oneFlap / criteria are app-authored summaries.) Tj ET
+BT /F1 10 Tf 0.420 0.170 0.070 rg 1 0 0 1 52.00 493.89 Tm (Results partly reflect prompt engineering, not raw pixel perception.) Tj ET
+BT /F1 10 Tf 0.420 0.170 0.070 rg 1 0 0 1 52.00 481.39 Tm (- No visual perception. Jev never sees the canvas ? only derived numbers + natural language.) Tj ET
+BT /F1 10 Tf 0.420 0.170 0.070 rg 1 0 0 1 52.00 468.89 Tm (Feature extraction errors become model errors.) Tj ET
+BT /F1 10 Tf 0.420 0.170 0.070 rg 1 0 0 1 52.00 456.39 Tm (- Fallback opacity vs truthfulness. Timeouts use heuristic/local backup so the drone keeps flying.) Tj ET
+BT /F1 10 Tf 0.420 0.170 0.070 rg 1 0 0 1 52.00 443.89 Tm (UI must label fallback, or demos overclaim "Jev flew.") Tj ET
+BT /F1 10 Tf 0.420 0.170 0.070 rg 1 0 0 1 52.00 431.39 Tm (- Non-determinism and eval hardness. Same state can yield different choices; live score is a noisy) Tj ET
+BT /F1 10 Tf 0.420 0.170 0.070 rg 1 0 0 1 52.00 418.89 Tm (KPI. Replay/benchmark tooling helps.) Tj ET
+BT /F1 10 Tf 0.420 0.170 0.070 rg 1 0 0 1 52.00 406.39 Tm (- Stale-discard tradeoff. Aggressive discard avoids late ceiling flaps, but throws away expensive) Tj ET
+BT /F1 10 Tf 0.420 0.170 0.070 rg 1 0 0 1 52.00 393.89 Tm (answers and can under-control under high latency.) Tj ET
+BT /F1 10 Tf 0.420 0.170 0.070 rg 1 0 0 1 52.00 381.39 Tm (- Scope boundary. This is a lab demo of structured real-time decisions ? not production autonomy or) Tj ET
+BT /F1 10 Tf 0.420 0.170 0.070 rg 1 0 0 1 52.00 368.89 Tm (sim-to-real transfer.) Tj ET
+BT /F2 12 Tf 0.060 0.090 0.160 rg 1 0 0 1 48.00 356.39 Tm (8. Stakeholder summary) Tj ET
+0.8 0.84 0.88 RG 1 w 48.00 342.39 m 547.28 342.39 l S
+0.945 0.961 0.976 rg 48.00 278.39 499.28 60.00 re f
+0.055 0.455 0.565 rg 48.00 278.39 2.5 60.00 re f
+BT /F3 10 Tf 0.06 0.09 0.16 rg 1 0 0 1 56.00 330.39 Tm (We run a tiny real-time flight sim; every few dozen milliseconds a harness asks Jev "flap or) Tj ET
+BT /F3 10 Tf 0.06 0.09 0.16 rg 1 0 0 1 56.00 317.89 Tm (wait?" with projected telemetry and fixed criteria; Jev returns a typed choice; the harness only) Tj ET
+BT /F3 10 Tf 0.06 0.09 0.16 rg 1 0 0 1 56.00 305.39 Tm (applies flaps that are still relevant to the live pose, otherwise falls back or waits ? making) Tj ET
+BT /F3 10 Tf 0.06 0.09 0.16 rg 1 0 0 1 56.00 292.89 Tm (the demo about bounded, inspectable decision latency, not open-ended LLM gameplay.) Tj ET
+BT /F1 8.5 Tf 0.390 0.450 0.550 rg 1 0 0 1 48.00 266.39 Tm (Generated from the JEV Flight Lab implementation \(DecisionManager, jevServer, game engine control loop\). For) Tj ET
+BT /F1 8.5 Tf 0.390 0.450 0.550 rg 1 0 0 1 48.00 255.39 Tm (implementation detail, see PROJECT_SPEC.md and TECHNICAL_IMPLEMENTATION.md.) Tj ET
+BT /F3 8 Tf 0.39 0.45 0.55 rg 1 0 0 1 277.64 28 Tm (Page 2/2) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 9 0 R /MediaBox [0 0 595.28 841.89] /Contents 5 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R /F4 4 0 R >> >> >>
+endobj
+8 0 obj
+<< /Type /Page /Parent 9 0 R /MediaBox [0 0 595.28 841.89] /Contents 6 0 R /Resources << /Font << /F1 1 0 R /F2 2 0 R /F3 3 0 R /F4 4 0 R >> >> >>
+endobj
+9 0 obj
+<< /Type /Pages /Kids [7 0 R 8 0 R] /Count 2 >>
+endobj
+10 0 obj
+<< /Type /Catalog /Pages 9 0 R >>
+endobj
+xref
+0 11
+0000000000 65535 f 
+0000000015 00000 n 
+0000000085 00000 n 
+0000000160 00000 n 
+0000000238 00000 n 
+0000000306 00000 n 
+0000008498 00000 n 
+0000014759 00000 n 
+0000014921 00000 n 
+0000015083 00000 n 
+0000015146 00000 n 
+trailer
+<< /Size 11 /Root 10 0 R >>
+startxref
+15196
+%%EOF

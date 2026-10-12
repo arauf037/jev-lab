@@ -1,7 +1,7 @@
 "use client";
 
 import type { DecisionRecord } from "@/lib/game/types";
-import { formatAction, formatMs, formatPercent } from "@/lib/utils/formatters";
+import { explainStaleReason, formatAction, formatMs, formatPercent } from "@/lib/utils/formatters";
 
 interface DecisionInspectorProps {
   decision: DecisionRecord | null;
@@ -32,7 +32,17 @@ export function DecisionInspector({ decision }: DecisionInspectorProps) {
         <Badge label="Latency" value={formatMs(decision.latencyMs)} />
         <Badge label="Provider" value={decision.provider} />
         <Badge label="Outcome" value={decision.outcome} />
+        <Badge label="Age" value={formatMs(decision.decisionAgeMs)} />
+        {decision.outcome === "stale" && (
+          <Badge label="Discarded" value={explainStaleReason(decision.staleReason)} />
+        )}
       </div>
+      <ol className="mb-3 space-y-1 font-mono text-[11px] text-slate-300">
+        <li>State captured {formatMs(0)}</li>
+        <li>Request sent {rel(decision.trace.gameStateCapturedAt, decision.trace.jevRequestSentAt)}</li>
+        <li>Response received {rel(decision.trace.gameStateCapturedAt, decision.trace.jevResponseReceivedAt)}</li>
+        <li>Decision applied {rel(decision.trace.gameStateCapturedAt, decision.trace.decisionAppliedAt)}</li>
+      </ol>
       <pre className="overflow-x-auto rounded-xl bg-black/40 p-3 font-mono text-[11px] leading-relaxed text-cyan-100/90">
 {JSON.stringify(
   {
@@ -51,6 +61,11 @@ export function DecisionInspector({ decision }: DecisionInspectorProps) {
       </pre>
     </section>
   );
+}
+
+function rel(start: number, value: number | null): string {
+  if (value == null) return "—";
+  return `+${formatMs(value - start)}`;
 }
 
 function Badge({ label, value }: { label: string; value: string }) {

@@ -8,7 +8,9 @@ import { GameCanvas } from "@/components/GameCanvas";
 import { GameHud } from "@/components/GameHud";
 import { JevDecisionPanel } from "@/components/JevDecisionPanel";
 import { LabPanel } from "@/components/LabPanel";
+import { BenchmarkPanel } from "@/components/BenchmarkPanel";
 import { ModeSelector } from "@/components/ModeSelector";
+import { ProviderSelector } from "@/components/ProviderSelector";
 import { StatusIndicator } from "@/components/StatusIndicator";
 import { TelemetryPanel } from "@/components/TelemetryPanel";
 import { useFlightGame } from "@/hooks/useFlightGame";
@@ -33,6 +35,13 @@ export function FlightLab() {
     flap,
     runLabDecision,
     localModel,
+    selectPilot,
+    pilot,
+    flightResults,
+    benchmark,
+    benchmarkBusy,
+    benchmarkError,
+    runBenchmark,
   } = useFlightGame();
 
   if (!gameState) {
@@ -58,7 +67,7 @@ export function FlightLab() {
               JEV Flight Lab
             </h1>
             <p className="mt-2 max-w-2xl text-sm text-slate-400">
-              Game engine owns physics. Jev chooses <span className="text-cyan-300">FLAP</span> or{" "}
+              Game engine owns physics. The selected pilot chooses <span className="text-cyan-300">FLAP</span> or{" "}
               <span className="text-violet-300">WAIT</span>. An optional LLM analyzes — never pilots.
             </p>
           </div>
@@ -70,6 +79,7 @@ export function FlightLab() {
             lastError={decisionSnap?.lastError ?? null}
             control={decisionSnap?.control ?? "mock"}
             localModel={localModel}
+            openaiModel={runtime.openaiModel}
           />
         </header>
 
@@ -89,11 +99,33 @@ export function FlightLab() {
                 />
               )}
               {gameState.mode === "lab" && gameState.status !== "game_over" && (
-                <OverlayMessage title="Lab paused" body="Inspect state · Run one Jev decision" />
+                <OverlayMessage title="Lab paused" body="Inspect state · Run one decision" />
+              )}
+              {gameState.mode === "compare" && gameState.status !== "game_over" && (
+                <OverlayMessage title="Compare" body="One pilot per flight. Switch to Autopilot to fly." />
               )}
             </div>
 
             <ModeSelector mode={gameState.mode} onChange={setMode} />
+            <ProviderSelector
+              pilot={pilot}
+              jevConfigured={runtime.jevConfigured}
+              openaiConfigured={runtime.openaiConfigured}
+              layaConfigured={runtime.layaConfigured}
+              openaiModel={runtime.openaiModel}
+              onChange={selectPilot}
+            />
+            {gameState.mode === "compare" && (
+              <BenchmarkPanel
+                flights={flightResults}
+                recordedStates={decisionSnap?.recordedStates ?? 0}
+                report={benchmark}
+                busy={benchmarkBusy}
+                error={benchmarkError}
+                onRun={() => void runBenchmark()}
+                canRun={runtime.jevConfigured && runtime.openaiConfigured}
+              />
+            )}
             <ControlBar
               status={gameState.status}
               mode={gameState.mode}
@@ -116,6 +148,7 @@ export function FlightLab() {
               inFlight={decisionSnap?.inFlight ?? false}
               phase={decisionSnap?.phase ?? "idle"}
               control={decisionSnap?.control ?? "mock"}
+              providerLabel={decisionSnap?.providerLabel ?? pilot}
               fallbackActive={decisionSnap?.status === "fallback"}
               tactical={createTacticalState(gameState, gameState.elapsedMs)}
             />
@@ -180,7 +213,7 @@ function GameOverOverlay({
           {demoMode
             ? "MOCK JEV · Press Fly Again"
             : state.mode === "autopilot"
-              ? `Jev made ${decisions.length} tactical decisions · Press Fly Again`
+              ? `${decisions.length} tactical decisions · Press Fly Again`
               : "Press Fly Again"}
         </p>
       </div>

@@ -1,9 +1,9 @@
 import type { TacticalState } from "@/lib/game/types";
-import { projectTacticalState } from "@/lib/game/tactical";
 import type {
   TacticalDecision,
   TacticalDecisionProvider,
 } from "./decisionProvider";
+import { tacticalStateForProvider } from "./decisionPayload";
 import { GAME_CONFIG } from "@/lib/game/constants";
 import { computeShouldFlap } from "./mockProvider";
 
@@ -16,7 +16,7 @@ export class JevDecisionProvider implements TacticalDecisionProvider {
 
   async decide(state: TacticalState): Promise<TacticalDecision> {
     const started = performance.now();
-    const projected = projectTacticalState(state, this.leadMs);
+    const projected = tacticalStateForProvider(state, this.leadMs);
     const controller = new AbortController();
     const timeout = setTimeout(
       () => controller.abort(),
@@ -76,7 +76,7 @@ export class JevDecisionProvider implements TacticalDecisionProvider {
       const latency = typeof data.latencyMs === "number" ? data.latencyMs : latencyMs;
       this.leadMs = Math.min(
         GAME_CONFIG.maxDecisionAgeMs,
-        Math.max(200, Math.round(latency))
+        Math.max(GAME_CONFIG.remoteLeadFloorMs, Math.round(latency))
       );
 
       return {
@@ -87,11 +87,20 @@ export class JevDecisionProvider implements TacticalDecisionProvider {
         provider,
         timestamp: Date.now(),
         isFallback: Boolean(data.isFallback) || provider === "fallback",
+        model: data.model,
+        inputTokens: finite(data.inputTokens),
+        outputTokens: finite(data.outputTokens),
+        totalTokens: finite(data.totalTokens),
+        reportedCostUsd: finite(data.reportedCostUsd),
       };
     } finally {
       clearTimeout(timeout);
     }
   }
+}
+
+function finite(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
 }
 
 export function createFallbackDecision(state: TacticalState): TacticalDecision {

@@ -5,7 +5,7 @@ import { GameEngine } from "../game/gameEngine";
 import type { TacticalState } from "../game/types";
 import type { TacticalDecision } from "./decisionProvider";
 import { DecisionManager } from "./decisionManager";
-import { decisionAgeMs, decisionIntervalFor } from "./control";
+import { decisionAgeMs, decisionIntervalFor, decisionIntervalForProvider } from "./control";
 
 function sampleState(overrides: Partial<TacticalState> = {}): TacticalState {
   return {
@@ -47,10 +47,27 @@ describe("control scheduling", () => {
     const close = sampleState({
       timeToGateMs: 400,
       relativeGapOffset: 0,
-      verticalVelocity: 0,
     });
     assert.equal(decisionIntervalFor(far), GAME_CONFIG.calmDecisionIntervalMs);
     assert.equal(decisionIntervalFor(close), GAME_CONFIG.urgentDecisionIntervalMs);
+  });
+
+  it("keeps Laya cadence in the local pilot band even when urgent", () => {
+    const close = sampleState({
+      timeToGateMs: 400,
+      relativeGapOffset: 0,
+      verticalVelocity: 0,
+    });
+    assert.equal(decisionIntervalFor(close), GAME_CONFIG.urgentDecisionIntervalMs);
+    assert.equal(
+      decisionIntervalForProvider(close, "laya", 70),
+      Math.max(
+        GAME_CONFIG.urgentDecisionIntervalMs,
+        GAME_CONFIG.localPilotUrgentIntervalMs,
+        Math.min(Math.round(70 * 1.25), 120)
+      )
+    );
+    assert.equal(decisionIntervalForProvider(close, "jev", 70), GAME_CONFIG.urgentDecisionIntervalMs);
   });
 
   it("calculates decision age from request to apply", () => {
@@ -115,6 +132,7 @@ describe("asynchronous decision controller", () => {
     mgr.sync(1, state, GAME_CONFIG.maxDecisionAgeMs + 50);
     const record = await pending;
     assert.equal(record.outcome, "stale");
+    assert.equal(record.staleReason, "too_old");
     assert.equal(record.trace.stale, true);
     assert.ok(record.trace.decisionAgeMs > GAME_CONFIG.maxDecisionAgeMs);
     assert.equal(applied.length, 0);
@@ -138,6 +156,93 @@ describe("asynchronous decision controller", () => {
     mgr.sync(1, live, 200);
     const record = await mgr.requestDecision(captured, "autopilot", 200);
     assert.equal(record.outcome, "stale");
+    assert.equal(record.staleReason, "above_opening");
+    assert.equal(applied.length, 0);
+  });
+
+  it("applies a flap when live is only mildly above and falling", async () => {
+    // Lead projection requested FLAP while below; live is still slightly above.
+    // Harness must not discard as above_opening.
+    const mgr = new DecisionManager(
+      { async decide() { return flapDecision(); } },
+      "laya"
+    );
+    const applied: string[] = [];
+    mgr.onDecisionApplied((record) => applied.push(record.action));
+    const requested = sampleState({
+      relativeGapOffset: 25,
+      predictedOffsetAtGate: 40,
+      verticalVelocity: 1.8,
+      altitude: 240,
+      gapSize: 180,
+      nextGateDistance: 90,
+    });
+    const live = sampleState({
+      relativeGapOffset: -15,
+      predictedOffsetAtGate: 40,
+      verticalVelocity: 1.8,
+      altitude: 260,
+      gapSize: 180,
+      nextGateDistance: 90,
+    });
+    mgr.sync(1, live, 200);
+    const record = await mgr.requestDecision(requested, "autopilot", 200);
+    assert.equal(record.stale, false);
+    assert.equal(record.staleReason, undefined);
+    assert.equal(mgr.getSnapshot().phase, "applied");
+    assert.deepEqual(applied, ["flap"]);
+  });
+
+  it("discards a near-center flap that was not requested while below", async () => {
+    // Laya noise: FLAP at center with a huge long-horizon prediction must not apply.
+    const mgr = new DecisionManager(
+      { async decide() { return flapDecision(); } },
+      "laya"
+    );
+    const applied: string[] = [];
+    mgr.onDecisionApplied((record) => applied.push(record.action));
+    const centered = sampleState({
+      relativeGapOffset: 0,
+      predictedOffsetAtGate: 400,
+      verticalVelocity: 0.5,
+      altitude: 260,
+      gapSize: 180,
+      nextGateDistance: 300,
+    });
+    mgr.sync(1, centered, 200);
+    const record = await mgr.requestDecision(centered, "autopilot", 200);
+    assert.equal(record.outcome, "stale");
+    assert.equal(record.staleReason, "above_opening");
+    assert.equal(applied.length, 0);
+  });
+
+  it("still discards a flap when live is rising above center", async () => {
+    const mgr = new DecisionManager(
+      { async decide() { return flapDecision(); } },
+      "laya"
+    );
+    const applied: string[] = [];
+    mgr.onDecisionApplied((record) => applied.push(record.action));
+    const requested = sampleState({
+      relativeGapOffset: 25,
+      predictedOffsetAtGate: 40,
+      verticalVelocity: 1.8,
+      altitude: 240,
+      gapSize: 180,
+      nextGateDistance: 90,
+    });
+    const live = sampleState({
+      relativeGapOffset: -15,
+      predictedOffsetAtGate: 40,
+      verticalVelocity: -2.0,
+      altitude: 260,
+      gapSize: 180,
+      nextGateDistance: 90,
+    });
+    mgr.sync(1, live, 200);
+    const record = await mgr.requestDecision(requested, "autopilot", 200);
+    assert.equal(record.outcome, "stale");
+    assert.equal(record.staleReason, "above_opening");
     assert.equal(applied.length, 0);
   });
 
@@ -158,6 +263,7 @@ describe("asynchronous decision controller", () => {
     release(flapDecision());
     const record = await pending;
     assert.equal(record.outcome, "stale");
+    assert.equal(record.staleReason, "previous_flight");
     assert.equal(applied.length, 0);
     assert.notEqual(engine.getSessionId(), 1);
   });
@@ -224,8 +330,44 @@ describe("asynchronous decision controller", () => {
     mgr.sync(1, state, 1100);
     const second = await mgr.requestDecision(state, "autopilot", 1100, true);
     assert.equal(second.outcome, "stale");
+    assert.equal(second.staleReason, "second_flap");
     assert.deepEqual(applied, ["jev:flap"]);
     assert.equal(mgr.getSnapshot().control, "jev");
+  });
+
+  it("does not stack a second primary flap inside the quiet window", async () => {
+    const mgr = new DecisionManager(
+      { async decide() { return flapDecision(); } },
+      "laya"
+    );
+    const applied: string[] = [];
+    mgr.onDecisionApplied((record) => applied.push(record.action));
+    const below = sampleState({ altitude: 200, relativeGapOffset: 25, predictedOffsetAtGate: 30 });
+    mgr.sync(1, below, 1000);
+    await mgr.requestDecision(below, "autopilot", 1000);
+    // After the climb, on/near center: quiet window must suppress a stacked flap.
+    const centered = sampleState({ altitude: 280, relativeGapOffset: 0, predictedOffsetAtGate: 0 });
+    mgr.sync(1, centered, 1100);
+    const second = await mgr.requestDecision(centered, "autopilot", 1100, true);
+    assert.equal(second.outcome, "stale");
+    assert.ok(second.staleReason === "second_flap" || second.staleReason === "above_opening");
+    assert.deepEqual(applied, ["flap"]);
+  });
+
+  it("allows a corrective Laya flap while still below the opening", async () => {
+    const mgr = new DecisionManager(
+      { async decide() { return flapDecision(); } },
+      "laya"
+    );
+    const applied: string[] = [];
+    mgr.onDecisionApplied((record) => applied.push(record.action));
+    const state = sampleState({ altitude: 200, relativeGapOffset: 25, predictedOffsetAtGate: 30 });
+    mgr.sync(1, state, 1000);
+    await mgr.requestDecision(state, "autopilot", 1000);
+    mgr.sync(1, state, 1100);
+    const second = await mgr.requestDecision(state, "autopilot", 1100, true);
+    assert.equal(second.outcome, "pending");
+    assert.deepEqual(applied, ["flap", "flap"]);
   });
 
   it("accepts a later jev flap after the quiet window", async () => {

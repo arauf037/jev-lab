@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>JEV Flight Lab — External Brief</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 16mm 16mm 18mm 16mm;
+    }
+
+    :root {
+      --ink: #0f172a;
+      --muted: #475569;
+      --line: #cbd5e1;
+      --accent: #0e7490;
+      --soft: #f1f5f9;
+      --warn: #9a3412;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font: 10.5pt/1.45 "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    h1 {
+      margin: 0 0 4pt;
+      font-size: 20pt;
+      letter-spacing: -0.02em;
+      color: var(--accent);
+    }
+
+    .subtitle {
+      margin: 0 0 14pt;
+      color: var(--muted);
+      font-size: 10pt;
+    }
+
+    h2 {
+      margin: 16pt 0 6pt;
+      padding-bottom: 3pt;
+      border-bottom: 1px solid var(--line);
+      font-size: 12.5pt;
+      color: var(--ink);
+      page-break-after: avoid;
+    }
+
+    h3 {
+      margin: 10pt 0 4pt;
+      font-size: 10.5pt;
+      page-break-after: avoid;
+    }
+
+    p { margin: 0 0 7pt; }
+
+    .callout {
+      margin: 8pt 0 12pt;
+      padding: 8pt 10pt;
+      background: var(--soft);
+      border-left: 3px solid var(--accent);
+      font-style: italic;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 6pt 0 10pt;
+      font-size: 9.5pt;
+      page-break-inside: avoid;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 5pt 7pt;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--soft);
+      font-weight: 600;
+    }
+
+    ul, ol {
+      margin: 4pt 0 8pt;
+      padding-left: 18pt;
+    }
+
+    li { margin-bottom: 3pt; }
+
+    code {
+      font-family: "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 9pt;
+      background: var(--soft);
+      padding: 1pt 3pt;
+      border-radius: 2pt;
+    }
+
+    pre {
+      margin: 6pt 0 10pt;
+      padding: 8pt 10pt;
+      background: #0b1220;
+      color: #e2e8f0;
+      border-radius: 4pt;
+      font: 8.5pt/1.4 "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+      white-space: pre-wrap;
+      page-break-inside: avoid;
+    }
+
+    .meta {
+      display: flex;
+      gap: 14pt;
+      margin-bottom: 12pt;
+      color: var(--muted);
+      font-size: 9pt;
+    }
+
+    .limitations li strong { color: var(--warn); }
+
+    .footer-note {
+      margin-top: 14pt;
+      padding-top: 8pt;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 9pt;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10pt;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 4pt;
+      padding: 8pt 10pt;
+      page-break-inside: avoid;
+    }
+
+    .card h3 { margin-top: 0; }
+
+    .field-table td:first-child {
+      white-space: nowrap;
+      font-family: "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 8.5pt;
+      width: 28%;
+    }
+
+    .prompt-block {
+      margin: 6pt 0 10pt;
+      padding: 8pt 10pt;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 4pt;
+      page-break-inside: avoid;
+    }
+
+    .prompt-block .label {
+      margin: 0 0 4pt;
+      font-size: 8.5pt;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+
+    .prompt-block p {
+      margin: 0;
+      font-size: 9.5pt;
+    }
+
+    .toc {
+      margin: 0 0 14pt;
+      padding: 8pt 12pt;
+      background: var(--soft);
+      border-radius: 4pt;
+      font-size: 9.5pt;
+    }
+
+    .toc a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .toc ol {
+      margin: 4pt 0 0;
+      padding-left: 18pt;
+    }
+  </style>
+</head>
+<body>
+  <h1>JEV Flight Lab</h1>
+  <p class="subtitle">External brief — game, agent harness, Jev I/O, execution, and limitations</p>
+  <div class="meta">
+    <span>Audience: external technical / product partners</span>
+    <span>Scope: prototype control-loop demo</span>
+    <span>Decision model: Jev (OpenRouter Decisions API)</span>
+  </div>
+
+  <nav class="toc">
+    <strong>Contents</strong>
+    <ol>
+      <li><a href="#product">What the product is</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#loop">Control loop</a></li>
+      <li><a href="#input-state">Input state</a></li>
+      <li><a href="#jev-prompts">Jev prompts</a></li>
+      <li><a href="#output-state">Output state</a></li>
+      <li><a href="#execution">How the agent executes output</a></li>
+      <li><a href="#limitations">Limitations and challenges</a></li>
+      <li><a href="#summary">Stakeholder summary</a></li>
+    </ol>
+  </nav>
+
+  <h2 id="product">1. What the product is</h2>
+  <p>
+    <strong>JEV Flight Lab</strong> is a Flappy Bird–style 2D browser demo. A neon drone flies through gate openings.
+    The game engine owns physics, rendering, collisions, and scoring.
+    <strong>Jev is not the game</strong> — it is a tactical decision service that only answers
+    <strong>FLAP</strong> or <strong>WAIT</strong>.
+  </p>
+  <div class="callout">
+    Game state → bounded AI decision → action → observable outcome
+  </div>
+  <p>
+    The demo shows a real-time control loop with a typed decision model, not chat-based “play the game with prose.”
+  </p>
+
+  <h2 id="architecture">2. Architecture — who owns what</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Layer</th>
+        <th>Owns</th>
+        <th>Does not own</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Game engine</strong></td>
+        <td>Physics, gates, collisions, score, lifecycle</td>
+        <td>AI reasoning</td>
+      </tr>
+      <tr>
+        <td><strong>Harness (DecisionManager)</strong></td>
+        <td>Cadence, timeout, stale checks, fallback, apply/discard</td>
+        <td>Model weights</td>
+      </tr>
+      <tr>
+        <td><strong>Jev provider</strong></td>
+        <td>Projects state, calls API, parses choice</td>
+        <td>Execution in the world</td>
+      </tr>
+      <tr>
+        <td><strong>Optional LLM analyst</strong></td>
+        <td>Slow strategic commentary (~10s)</td>
+        <td>Per-tick control</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    <strong>Critical split:</strong> Jev decides; the harness decides whether that answer is still safe to apply;
+    the engine applies a single physics impulse if allowed.
+  </p>
+
+  <h2 id="loop">3. End-to-end control loop</h2>
+  <pre>Animation frame (~60fps)
+  → engine.update(physics)
+  → build TacticalState from live pose
+  → DecisionManager.sync(session, state)
+  → maybeRequest() if interval elapsed &amp; no in-flight call
+       → project state by ~latency lead
+       → POST /api/jev/decision  { state }
+       → server builds Decisions API payload (prompts + telemetry)
+       → OpenRouter Jev returns choice flap|wait
+  → harness validates age / relevance / session
+  → if flap + autopilot + still valid → engine.dispatch(FLAP)
+       → velocityY = flapImpulse (one bounded hop)
+  → if wait → do nothing (gravity continues)</pre>
+  <p>
+    Cadence is adaptive (~40–100&nbsp;ms target poll), but only one request is in flight, so real rate is bounded by network RTT.
+    Client timeout: <strong>1&nbsp;s</strong>. Max decision age: <strong>1&nbsp;s</strong>.
+  </p>
+
+  <!-- ========== INPUT STATE ========== -->
+  <h2 id="input-state">4. Input state (what we send toward Jev)</h2>
+  <p>
+    Flow: browser posts projected telemetry to <code>POST /api/jev/decision</code> → server wraps it with prompts →
+    OpenRouter Decisions API. Telemetry is a <strong>projected</strong> snapshot (lead ≈ recent latency, ~200–1000&nbsp;ms)
+    so Jev answers for near-future pose, not already-stale past.
+  </p>
+
+  <h3>4.1 Browser → Next.js body</h3>
+  <pre>{
+  "state": {
+    "altitude": 268.4,
+    "verticalVelocity": 1.2,
+    "nextGateDistance": 142.0,
+    "gapCenterY": 250.0,
+    "gapSize": 168.0,
+    "relativeGapOffset": 18.4,
+    "horizontalVelocity": 2.6,
+    "recentFlaps": 1,
+    "timeSinceLastFlapMs": 420,
+    "droneAlive": true,
+    "timeToGateMs": 910,
+    "predictedOffsetAtGate": 34.0,
+    "gapMargin": 65.6
+  }
+}</pre>
+  <p>Numbers above are illustrative. Field meanings:</p>
+  <table class="field-table">
+    <thead>
+      <tr>
+        <th>Field</th>
+        <th>Meaning</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>altitude</td><td>Drone Y position (pixels)</td></tr>
+      <tr><td>verticalVelocity</td><td>Up/down speed; positive = falling in this engine</td></tr>
+      <tr><td>nextGateDistance</td><td>Horizontal distance to the next gate</td></tr>
+      <tr><td>gapCenterY</td><td>Y of the opening center</td></tr>
+      <tr><td>gapSize</td><td>Opening height (pixels)</td></tr>
+      <tr><td>relativeGapOffset</td><td>Drone vs gap center; <strong>positive = below center</strong></td></tr>
+      <tr><td>horizontalVelocity</td><td>Forward speed</td></tr>
+      <tr><td>recentFlaps</td><td>Flaps in the recent window</td></tr>
+      <tr><td>timeSinceLastFlapMs</td><td>Milliseconds since last flap</td></tr>
+      <tr><td>droneAlive</td><td>Whether the drone is still in play</td></tr>
+      <tr><td>timeToGateMs</td><td>ETA to the next gate at current horizontal speed</td></tr>
+      <tr><td>predictedOffsetAtGate</td><td>Ballistic gap offset at the gate if no flap; positive = below center</td></tr>
+      <tr><td>gapMargin</td><td>Signed room inside the opening; positive = inside the gap</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.2 Full OpenRouter Decisions request (server → Jev)</h3>
+  <p>
+    Built by <code>buildJevDecisionsRequest()</code> in <code>src/lib/ai/jevServer.ts</code>.
+    Default model: <code>typesafe/jev-1.13</code>.
+  </p>
+  <pre>{
+  "model": "typesafe/jev-1.13",
+  "state": {
+    "task": "&lt;fixed task string — see §5&gt;",
+    "ifYouWait": "&lt;generated NL forecast — see §5&gt;",
+    "oneFlap": "&lt;generated NL flap effect — see §5&gt;",
+    "telemetry": { /* same TacticalState object as §4.1 */ }
+  },
+  "questions": {
+    "action": {
+      "type": "choice",
+      "instructions": "&lt;fixed instructions — see §5&gt;",
+      "criteria": {
+        "flap": "&lt;fixed flap criterion — see §5&gt;",
+        "wait": "&lt;fixed wait criterion — see §5&gt;"
+      }
+    }
+  }
+}</pre>
+
+  <!-- ========== JEV PROMPTS ========== -->
+  <h2 id="jev-prompts">5. Jev prompts (exact strings from the app)</h2>
+  <p>
+    Jev uses the <strong>Decisions API</strong>, not chat completions. There is no free-form system chat prompt.
+    The “prompt” is the structured <code>state.*</code> strings plus <code>questions.action</code> below
+    (source: <code>buildJevDecisionsRequest</code>, <code>forecastIfWaiting</code>, <code>describeFlapAgainstOpening</code>).
+  </p>
+
+  <h3>5.1 Fixed task</h3>
+  <div class="prompt-block">
+    <p class="label">state.task</p>
+    <p>Fly the drone through the gate openings. ifYouWait says where the drone is and where one more WAIT leaves it. Do not add any further prediction.</p>
+  </div>
+
+  <h3>5.2 Generated situation strings</h3>
+  <p>
+    These are rebuilt every request from the live/projected <code>TacticalState</code>.
+    Templates (placeholders filled at runtime):
+  </p>
+  <div class="prompt-block">
+    <p class="label">state.ifYouWait — from forecastIfWaiting()</p>
+    <p>
+      If you WAIT, the drone is <em>{placePhrase(relativeGapOffset)}</em>,
+      <em>{close to the floor | clear of the floor | close to the ceiling}</em>, and
+      <em>{falling | rising | level}</em>. The gate arrives in <em>{seconds}</em>s.
+      One more WAIT leaves the drone <em>{below | inside | above} the opening</em>.
+      With no flap, the engine predicts <em>{placePhrase(predictedOffsetAtGate)}</em> at the gate.
+    </p>
+  </div>
+  <div class="prompt-block">
+    <p class="label">state.oneFlap — from describeFlapAgainstOpening()</p>
+    <p>
+      One FLAP climbs about <em>{climbPx}</em>px. The next opening extends <em>{halfGap}</em>px above and below its center.
+      Compared with this hurdle, that climb <em>{would carry the drone above the opening |
+      covers the Npx below the center and still leaves the drone inside the opening |
+      would move the drone farther above the center}</em>.
+      WAIT lets gravity pull the drone down.
+    </p>
+  </div>
+  <p>Example after filling:</p>
+  <pre>"ifYouWait": "If you WAIT, the drone is 18px below the opening center, clear of the floor, and falling. The gate arrives in 0.9s. One more WAIT leaves the drone below the opening. With no flap, the engine predicts 34px below the opening center at the gate.",
+"oneFlap": "One FLAP climbs about 48px. The next opening extends 84px above and below its center. Compared with this hurdle, that climb covers the 18px below the center and still leaves the drone inside the opening. WAIT lets gravity pull the drone down."</pre>
+
+  <h3>5.3 Choice question — instructions</h3>
+  <div class="prompt-block">
+    <p class="label">questions.action.instructions</p>
+    <p>
+      Use ifYouWait and oneFlap only. Compare the FLAP climb with the opening height.
+      FLAP when the drone is below the opening center and that climb still leaves it inside the opening,
+      or one more WAIT leaves it below the opening, or it is close to the floor.
+      WAIT when that climb would carry the drone above the opening, or the drone is already on or above
+      the opening center and one more WAIT leaves it inside or above the opening, and it is clear of the floor.
+      FLAP never moves the drone downward.
+    </p>
+  </div>
+
+  <h3>5.4 Choice criteria</h3>
+  <div class="prompt-block">
+    <p class="label">questions.action.criteria.flap</p>
+    <p>
+      The drone is below the opening center and one FLAP still leaves it inside the opening,
+      or one more WAIT leaves it below the opening, or it is close to the floor.
+    </p>
+  </div>
+  <div class="prompt-block">
+    <p class="label">questions.action.criteria.wait</p>
+    <p>
+      One FLAP would carry the drone above the opening, or the drone is on or above the opening center
+      and one more WAIT leaves it inside or above the opening, and it is clear of the floor.
+    </p>
+  </div>
+  <p>
+    <strong>The ask:</strong> return a typed choice — <code>flap</code> or <code>wait</code> — under those criteria.
+    Jev is not asked for prose explanations.
+  </p>
+
+  <!-- ========== OUTPUT STATE ========== -->
+  <h2 id="output-state">6. Output state (what Jev returns, and what the app keeps)</h2>
+
+  <h3>6.1 Raw OpenRouter / Jev Decisions response (shape)</h3>
+  <pre>{
+  "answers": {
+    "action": {
+      "type": "choice",
+      "choice": "flap",
+      "probabilities": { "flap": 0.78, "wait": 0.22 },
+      "confidence": 0.74
+    }
+  },
+  "usage": {
+    "input_tokens": 420,
+    "output_tokens": 12,
+    "total_tokens": 432,
+    "cost": 0.00012
+  }
+}</pre>
+  <p>
+    Parser: <code>parseJevDecisionsResponse()</code>. Rejects missing answers, non-<code>choice</code> types,
+    and any choice other than <code>flap</code> / <code>wait</code> (case-insensitive).
+  </p>
+
+  <h3>6.2 App-facing TacticalDecision (returned to browser / harness)</h3>
+  <pre>{
+  "action": "flap",
+  "probabilities": { "flap": 0.78, "wait": 0.22 },
+  "confidence": 0.74,
+  "latencyMs": 184,
+  "provider": "jev",
+  "timestamp": 1710000000123,
+  "isFallback": false,
+  "inputTokens": 420,
+  "outputTokens": 12,
+  "totalTokens": 432,
+  "reportedCostUsd": 0.00012
+}</pre>
+  <table class="field-table">
+    <thead>
+      <tr>
+        <th>Field</th>
+        <th>Meaning</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>action</td><td>Required: <code>"flap"</code> | <code>"wait"</code></td></tr>
+      <tr><td>probabilities</td><td>Optional flap/wait distribution from Jev</td></tr>
+      <tr><td>confidence</td><td>Optional scalar confidence from Jev</td></tr>
+      <tr><td>latencyMs</td><td>Measured round-trip (server and/or client)</td></tr>
+      <tr><td>provider</td><td><code>jev</code> | <code>mock</code> | <code>fallback</code> | <code>local</code> | <code>openai</code></td></tr>
+      <tr><td>timestamp</td><td>When the decision was sealed locally</td></tr>
+      <tr><td>isFallback</td><td>True when not a live provider answer</td></tr>
+      <tr><td>inputTokens / outputTokens / totalTokens</td><td>Optional usage from API</td></tr>
+      <tr><td>reportedCostUsd</td><td>Optional cost from API usage.cost</td></tr>
+    </tbody>
+  </table>
+
+  <h3>6.3 Failure / backup output</h3>
+  <p>
+    On timeout, HTTP error, or invalid choice, the harness calls a backup (local model or deterministic heuristic).
+    That output still has <code>action: "flap" | "wait"</code>, but
+    <code>provider</code> is <code>"local"</code> or <code>"fallback"</code> (never relabeled as live Jev).
+  </p>
+
+  <h2 id="execution">7. How the agent executes the output</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Answer</th>
+        <th>Execution</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>wait</strong></td>
+        <td>No control action; gravity keeps acting</td>
+      </tr>
+      <tr>
+        <td><strong>flap</strong></td>
+        <td>If still valid under harness rules → <code>FLAP</code> → sets <code>velocityY = flapImpulse</code> once</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>The harness may discard even a “correct” Jev flap when:</p>
+  <ul>
+    <li>decision age &gt; 1&nbsp;s (<code>too_old</code>)</li>
+    <li>drone already above the opening enough that a flap would climb into the pipe (<code>above_opening</code>)</li>
+    <li>a second impulse too soon after another flap (<code>second_flap</code>, ~280&nbsp;ms quiet window)</li>
+    <li>response belongs to a previous flight/session (<code>previous_flight</code> / <code>replaced</code>)</li>
+  </ul>
+  <p><strong>Model output ≠ world action.</strong> The harness is the safety / relevance gate.</p>
+
+  <h2 id="limitations">8. Key limitations and challenges</h2>
+  <ul class="limitations">
+    <li><strong>Latency vs game speed.</strong> Gates close in seconds; Jev RTT is often hundreds of ms. Mitigation: state projection + stale discard — projection is approximate, not a full simulator inside Jev.</li>
+    <li><strong>Binary, myopic action space.</strong> Only flap/wait for the current opening. No multi-gate planning, thrust magnitude, or continuous control.</li>
+    <li><strong>Prompted heuristics in the loop.</strong> <code>ifYouWait</code> / <code>oneFlap</code> / criteria are app-authored summaries. Results partly reflect prompt engineering, not raw pixel perception.</li>
+    <li><strong>No visual perception.</strong> Jev never sees the canvas — only derived numbers + natural language. Feature extraction errors become model errors.</li>
+    <li><strong>Fallback opacity vs truthfulness.</strong> Timeouts use heuristic/local backup so the drone keeps flying. UI must label fallback, or demos overclaim “Jev flew.”</li>
+    <li><strong>Non-determinism and eval hardness.</strong> Same state can yield different choices; live score is a noisy KPI. Replay/benchmark tooling helps.</li>
+    <li><strong>Stale-discard tradeoff.</strong> Aggressive discard avoids late ceiling flaps, but throws away expensive answers and can under-control under high latency.</li>
+    <li><strong>Scope boundary.</strong> This is a lab demo of structured real-time decisions — not production autonomy or sim-to-real transfer.</li>
+  </ul>
+
+  <h2 id="summary">9. Stakeholder summary</h2>
+  <div class="callout">
+    We run a tiny real-time flight sim; every few dozen milliseconds a harness asks Jev “flap or wait?” with projected telemetry and fixed criteria; Jev returns a typed choice; the harness only applies flaps that are still relevant to the live pose, otherwise falls back or waits — making the demo about bounded, inspectable decision latency, not open-ended LLM gameplay.
+  </div>
+
+  <p class="footer-note">
+    Generated from the JEV Flight Lab implementation (<code>DecisionManager</code>, <code>jevServer.buildJevDecisionsRequest</code>, game engine control loop).
+    For implementation detail, see <code>PROJECT_SPEC.md</code> and <code>TECHNICAL_IMPLEMENTATION.md</code>.
+  </p>
+</body>
+</html>

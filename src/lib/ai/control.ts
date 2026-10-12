@@ -22,6 +22,25 @@ export function decisionIntervalFor(state: TacticalState): number {
   return GAME_CONFIG.decisionIntervalMs;
 }
 
+/**
+ * Local GPU pilots return faster than remote ones. Keep a calmer default
+ * cadence (~180ms), but near a gate / fast fall allow ~90ms so a late
+ * correction can still land before the pipe.
+ */
+export function decisionIntervalForProvider(
+  state: TacticalState,
+  providerLabel: "jev" | "openai" | "mock" | "laya",
+  recentLatencyMs = 0
+): number {
+  const base = decisionIntervalFor(state);
+  if (providerLabel !== "laya") return base;
+  const latencyFloor = recentLatencyMs > 0 ? Math.round(recentLatencyMs * 1.25) : 0;
+  if (base === GAME_CONFIG.urgentDecisionIntervalMs) {
+    return Math.max(base, GAME_CONFIG.localPilotUrgentIntervalMs, Math.min(latencyFloor, 120));
+  }
+  return Math.max(base, GAME_CONFIG.localPilotIntervalMs, latencyFloor);
+}
+
 export function decisionAgeMs(requestedAt: number, appliedAt: number): number {
   return appliedAt - requestedAt;
 }
@@ -32,14 +51,39 @@ export function droneY(state: TacticalState): number {
 
 /**
  * A FLAP is a single upward impulse. Apply it only while the drone still
- * needs to go up. A late flap above the opening climbs into the pipe.
+ * needs lift. Soft "any flap while not rising" gating let Laya's noisy FLAPs
+ * spam into the first pipe; keep the guard strict, with one exception for the
+ * lead-projection apply window (requested below, live only mildly above).
  */
-export function isFlapStillRelevant(state: TacticalState): boolean {
-  if (!state.droneAlive) return false;
-  const half = state.gapSize / 2;
-  if (state.relativeGapOffset < -half * 0.7) return false;
-  if (state.altitude < 80) return true;
-  if (state.relativeGapOffset > 8) return true;
-  const predicted = state.predictedOffsetAtGate ?? state.relativeGapOffset;
-  return predicted > half * 0.75;
+export function isFlapStillRelevant(
+  live: TacticalState,
+  requested?: TacticalState
+): boolean {
+  if (!live.droneAlive) return false;
+  const half = live.gapSize / 2;
+  // Past the leading edge while still overlapping the pipe: a flap hits the top lip.
+  if (live.nextGateDistance < 0 && live.altitude >= 80) return false;
+  // Far above the opening: never climb into the top pipe.
+  if (live.relativeGapOffset < -half * 0.7) return false;
+  if (live.altitude < 80) return true;
+  // Actively rising: never stack another climb.
+  if (live.verticalVelocity < -0.5) return false;
+
+  // Above center: discard unless this flap was requested while clearly below
+  // and live has only mildly crossed center (lead apply window).
+  if (live.relativeGapOffset < -8) {
+    return Boolean(
+      requested &&
+        requested.relativeGapOffset > 8 &&
+        live.relativeGapOffset > -half * 0.35
+    );
+  }
+
+  // Clearly below: keep.
+  if (live.relativeGapOffset > 8) return true;
+
+  // On / near center: do not trust long-horizon prediction alone (it stays
+  // huge far from the gate and was applying FLAPs at spawn). Only keep a flap
+  // that was requested while still below.
+  return Boolean(requested && requested.relativeGapOffset > 8);
 }

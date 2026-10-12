@@ -1,4 +1,14 @@
-export type GameMode = "autopilot" | "manual" | "lab";
+export type GameMode = "autopilot" | "manual" | "lab" | "compare";
+
+export type DecisionProviderName = "jev" | "openai" | "mock" | "fallback" | "local" | "laya";
+
+/** Why a returned action was thrown away and did not move the drone. */
+export type StaleReason =
+  | "too_old"
+  | "above_opening"
+  | "second_flap"
+  | "previous_flight"
+  | "replaced";
 
 export type GameStatus = "idle" | "running" | "paused" | "game_over";
 
@@ -122,6 +132,7 @@ export interface DecisionTrace {
 
 export interface DecisionRecord {
   id: string;
+  decisionId: string;
   requestId: number;
   action: TacticalAction;
   probabilities?: {
@@ -130,11 +141,27 @@ export interface DecisionRecord {
   };
   confidence?: number;
   latencyMs: number;
-  provider: "jev" | "mock" | "fallback" | "local";
+  provider: DecisionProviderName;
   timestamp: number;
   tacticalState: TacticalState;
   outcome: DecisionOutcome;
   isFallback?: boolean;
   sessionId: number;
   trace: DecisionTrace;
+  model?: string;
+  requestStartedAt: number;
+  responseReceivedAt: number;
+  appliedAt?: number;
+  stateCapturedAt: number;
+  decisionAgeMs: number;
+  inputTokens?: number;
+  outputTokens?: number;
+  totalTokens?: number;
+  /** Computed from published token prices. Never invented. */
+  estimatedCostUsd?: number;
+  /** Copied from provider billing data when the API returns it. */
+  reportedCostUsd?: number;
+  stale: boolean;
+  staleReason?: StaleReason;
+  fallback: boolean;
 }

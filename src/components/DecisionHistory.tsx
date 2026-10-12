@@ -1,7 +1,7 @@
 "use client";
 
 import type { DecisionRecord } from "@/lib/game/types";
-import { formatAction, formatMs } from "@/lib/utils/formatters";
+import { explainStaleReason, formatAction, formatMs } from "@/lib/utils/formatters";
 
 interface DecisionHistoryProps {
   history: DecisionRecord[];
@@ -34,15 +34,18 @@ export function DecisionHistory({ history, selectedId, onSelect }: DecisionHisto
             >
               <span className="font-mono text-cyan-100">
                 {formatAction(item.action)}
-                {item.outcome === "stale" ? " · stale" : ""}
+                {item.outcome === "stale" ? ` · ${explainStaleReason(item.staleReason)}` : ""}
                 {item.provider === "local"
                   ? " · local model"
-                  : item.isFallback
-                    ? " · fallback"
-                    : ""}
+                  : item.provider === "laya"
+                    ? " · laya"
+                    : item.isFallback
+                      ? " · heuristic"
+                      : ""}
               </span>
-              <span className="text-xs text-slate-400">
-                {formatMs(item.latencyMs)} · {item.provider}
+              <span className="text-right text-xs text-slate-400">
+                {formatMs(item.latencyMs)} call · {formatMs(item.decisionAgeMs)} age
+                <span className="block">{item.provider}</span>
               </span>
             </button>
           );

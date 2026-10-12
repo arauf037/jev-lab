@@ -3,7 +3,7 @@
 import type { ControlPhase } from "@/lib/ai/decisionManager";
 import { decisionIntervalFor } from "@/lib/ai/control";
 import type { DecisionRecord, TacticalState } from "@/lib/game/types";
-import { formatAction, formatMs, formatPercent } from "@/lib/utils/formatters";
+import { explainStaleReason, formatAction, formatMs, formatPercent, formatUsd } from "@/lib/utils/formatters";
 
 interface JevDecisionPanelProps {
   decision: DecisionRecord | null;
@@ -12,7 +12,8 @@ interface JevDecisionPanelProps {
   mode: string;
   inFlight: boolean;
   phase: ControlPhase;
-  control: "jev" | "mock" | "fallback" | "local";
+  control: "jev" | "openai" | "mock" | "fallback" | "local" | "laya";
+  providerLabel: "jev" | "openai" | "mock" | "laya";
   fallbackActive: boolean;
   tactical: TacticalState | null;
 }
@@ -25,6 +26,7 @@ export function JevDecisionPanel({
   inFlight,
   phase,
   control,
+  providerLabel,
   fallbackActive,
   tactical,
 }: JevDecisionPanelProps) {
@@ -41,7 +43,7 @@ export function JevDecisionPanel({
     <section className="panel-card">
       <header className="mb-3 flex items-center justify-between">
         <h2 className="text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300">
-          {mode === "manual" ? "Jev Would Choose" : "Jev Decision"}
+          {panelTitle(mode, providerLabel)}
         </h2>
         <span className="text-[11px] uppercase tracking-wider text-slate-400">
           {fallbackActive ? "offline" : inFlight ? "thinking" : "ready"}
@@ -51,8 +53,16 @@ export function JevDecisionPanel({
       {fallbackActive && (
         <p className="mb-3 text-xs font-semibold tracking-[0.14em] text-rose-200">
           {control === "local"
-            ? "JEV TIMEOUT · LOCAL MODEL ACTIVE"
-            : "JEV OFFLINE · FALLBACK CONTROLLER ACTIVE"}
+            ? providerLabel === "openai"
+              ? "GPT TIMEOUT · LOCAL MODEL ACTIVE"
+              : providerLabel === "laya"
+                ? "LAYA TIMEOUT · LOCAL MODEL ACTIVE"
+                : "JEV TIMEOUT · LOCAL MODEL ACTIVE"
+            : providerLabel === "openai"
+              ? "GPT TIMEOUT · FALLBACK CONTROLLER ACTIVE"
+              : providerLabel === "laya"
+                ? "LAYA OFFLINE · FALLBACK CONTROLLER ACTIVE"
+                : "JEV OFFLINE · FALLBACK CONTROLLER ACTIVE"}
         </p>
       )}
 
@@ -92,7 +102,18 @@ export function JevDecisionPanel({
 
       <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
         <Metric label="Decision age" value={decision ? formatMs(decision.trace.decisionAgeMs) : "N/A"} />
-        <Metric label="Jev latency" value={decision ? formatMs(decision.latencyMs) : "N/A"} />
+        <Metric
+          label={
+            providerLabel === "openai"
+              ? "GPT latency"
+              : providerLabel === "laya"
+                ? "Laya latency"
+                : providerLabel === "mock"
+                  ? "Latency"
+                  : "Jev latency"
+          }
+          value={decision ? formatMs(decision.latencyMs) : "N/A"}
+        />
         <Metric
           label="Decision interval"
           value={tactical ? formatMs(decisionIntervalFor(tactical)) : "N/A"}
@@ -117,13 +138,44 @@ export function JevDecisionPanel({
           value={`${decision?.provider ?? "N/A"}${decision?.isFallback ? " (fallback)" : ""}`}
         />
       </dl>
+      <UsageLine decision={decision} />
     </section>
   );
 }
 
+function panelTitle(mode: string, providerLabel: "jev" | "openai" | "mock" | "laya"): string {
+  if (mode === "manual") {
+    if (providerLabel === "openai") return "GPT Would Choose";
+    if (providerLabel === "laya") return "Laya Would Choose";
+    return "Jev Would Choose";
+  }
+  if (providerLabel === "openai") return "GPT Pilot";
+  if (providerLabel === "laya") return "Laya Pilot";
+  return "Jev Decision";
+}
+
+function UsageLine({ decision }: { decision: DecisionRecord | null }) {
+  if (!decision) return null;
+  const hasTokens = decision.inputTokens != null || decision.outputTokens != null || decision.totalTokens != null;
+  const hasCost = decision.estimatedCostUsd != null || decision.reportedCostUsd != null;
+  if (!hasTokens && !hasCost) return null;
+  const usage = hasTokens
+    ? `Actual usage ${decision.inputTokens ?? "—"} in / ${decision.outputTokens ?? "—"} out`
+    : "Actual usage unavailable";
+  const cost =
+    decision.estimatedCostUsd != null
+      ? `Estimated cost ${formatUsd(decision.estimatedCostUsd)}`
+      : decision.reportedCostUsd != null
+        ? `Reported cost ${formatUsd(decision.reportedCostUsd)}`
+        : "Estimated cost unavailable";
+  return <p className="mt-3 text-[11px] uppercase tracking-wider text-slate-400">{usage} · {cost}</p>;
+}
+
 function phaseLabel(phase: ControlPhase, lastEvent: DecisionRecord | null): string {
   if (phase === "in_flight" || phase === "requested") return "Requested · in flight";
-  if (phase === "discarded" || lastEvent?.outcome === "stale") return "Received · discarded as stale";
+  if (phase === "discarded" || lastEvent?.outcome === "stale") {
+    return `Discarded · ${explainStaleReason(lastEvent?.staleReason)}`;
+  }
   if (phase === "applied") return "Received · applied";
   return "Idle";
 }

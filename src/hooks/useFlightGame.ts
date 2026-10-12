@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DecisionManager } from "@/lib/ai/decisionManager";
 import type { DecisionManagerSnapshot } from "@/lib/ai/decisionManager";
+import { summarizeFlight, type BenchmarkReport, type FlightSummary } from "@/lib/ai/benchmark";
+import { runReplayBenchmark } from "@/lib/ai/benchmarkClient";
 import { JevDecisionProvider } from "@/lib/ai/jevProvider";
+import { LayaDecisionProvider } from "@/lib/ai/layaProvider";
+import { OpenAIDecisionProvider } from "@/lib/ai/openaiProvider";
 import {
   HttpAnalystProvider,
   LocalHeuristicAnalyst,
@@ -20,11 +24,24 @@ import type {
   GameMode,
   GameState,
 } from "@/lib/game/types";
+import type { PilotSelection } from "@/lib/config";
 
 interface RuntimeStatus {
   aiProvider: "jev" | "mock";
+  decisionProvider: PilotSelection;
   demoMode: boolean;
   llmConfigured: boolean;
+  jevConfigured: boolean;
+  openaiConfigured: boolean;
+  layaConfigured: boolean;
+  openaiModel: string;
+}
+
+function pilotProvider(kind: PilotSelection) {
+  if (kind === "openai") return new OpenAIDecisionProvider();
+  if (kind === "laya") return new LayaDecisionProvider();
+  if (kind === "mock") return new MockDecisionProvider();
+  return new JevDecisionProvider();
 }
 
 export function useFlightGame() {
@@ -40,9 +57,16 @@ export function useFlightGame() {
   const lastUiPushAt = useRef(0);
   const runtimeRef = useRef<RuntimeStatus>({
     aiProvider: "mock",
+    decisionProvider: "mock",
     demoMode: true,
     llmConfigured: false,
+    jevConfigured: false,
+    openaiConfigured: false,
+    layaConfigured: false,
+    openaiModel: "",
   });
+  const pilotRef = useRef<PilotSelection>("mock");
+  const recordedSessionRef = useRef<number | null>(null);
 
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [decisionSnap, setDecisionSnap] = useState<DecisionManagerSnapshot | null>(null);
@@ -50,9 +74,18 @@ export function useFlightGame() {
   const [analysis, setAnalysis] = useState<FlightAnalysis | null>(null);
   const [runtime, setRuntime] = useState<RuntimeStatus>({
     aiProvider: "mock",
+    decisionProvider: "mock",
     demoMode: true,
     llmConfigured: false,
+    jevConfigured: false,
+    openaiConfigured: false,
+    layaConfigured: false,
+    openaiModel: "",
   });
+  const [flightResults, setFlightResults] = useState<Partial<Record<"jev" | "openai", FlightSummary>>>({});
+  const [benchmark, setBenchmark] = useState<BenchmarkReport | null>(null);
+  const [benchmarkBusy, setBenchmarkBusy] = useState(false);
+  const [benchmarkError, setBenchmarkError] = useState<string | null>(null);
   const [humanAction, setHumanAction] = useState<"flap" | "wait" | null>(null);
   const [localModel, setLocalModel] = useState<LocalModelStatus>("loading");
   const lastHumanFlapAt = useRef(0);
@@ -67,21 +100,26 @@ export function useFlightGame() {
 
     async function boot() {
       const statusRes = await fetch("/api/status").catch(() => null);
-      const status = statusRes
-        ? ((await statusRes.json()) as RuntimeStatus)
-        : { aiProvider: "mock" as const, demoMode: true, llmConfigured: false };
+      const fallbackStatus: RuntimeStatus = {
+        aiProvider: "mock",
+        decisionProvider: "mock",
+        demoMode: true,
+        llmConfigured: false,
+        jevConfigured: false,
+        openaiConfigured: false,
+        layaConfigured: false,
+        openaiModel: "",
+      };
+      const status = statusRes ? ((await statusRes.json()) as RuntimeStatus) : fallbackStatus;
+      const decisionProvider = status.decisionProvider ?? (status.demoMode ? "mock" : "jev");
 
       if (cancelled) return;
 
-      runtimeRef.current = status;
-      setRuntime(status);
+      runtimeRef.current = { ...fallbackStatus, ...status, decisionProvider };
+      pilotRef.current = decisionProvider;
+      setRuntime(runtimeRef.current);
 
-      const mgr = new DecisionManager(
-        status.aiProvider === "mock"
-          ? new MockDecisionProvider()
-          : new JevDecisionProvider(),
-        status.demoMode ? "mock" : "jev"
-      );
+      const mgr = new DecisionManager(pilotProvider(decisionProvider), decisionProvider);
 
       mgr.onDecisionApplied((record) => {
         const currentEngine = engineRef.current;
@@ -190,7 +228,7 @@ export function useFlightGame() {
         const tactical = createTacticalState(state, state.elapsedMs);
         const now = performance.now();
         mgr.sync(engine.getSessionId(), tactical, now);
-        if (state.status === "running" && state.mode !== "lab") {
+        if (state.status === "running" && state.mode !== "lab" && state.mode !== "compare") {
           mgr.maybeRequest(tactical, state.mode, now);
         }
       }
@@ -239,10 +277,64 @@ export function useFlightGame() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  const selectPilot = useCallback((kind: PilotSelection) => {
+    const mgr = decisionRef.current;
+    if (!mgr) return;
+    if (kind === "openai" && !runtimeRef.current.openaiConfigured) return;
+    if (kind === "jev" && !runtimeRef.current.jevConfigured) return;
+    if (kind === "laya" && !runtimeRef.current.layaConfigured) return;
+    pilotRef.current = kind;
+    mgr.setProvider(pilotProvider(kind), kind);
+    setRuntime((current) => ({
+      ...current,
+      decisionProvider: kind,
+      demoMode: kind === "mock",
+    }));
+  }, []);
+
+  const runBenchmark = useCallback(async () => {
+    const mgr = decisionRef.current;
+    const states = mgr?.getRecordedStates() ?? [];
+    if (states.length === 0) {
+      setBenchmarkError("Fly an autopilot flight first so there are recorded states.");
+      return;
+    }
+    setBenchmarkBusy(true);
+    setBenchmarkError(null);
+    try {
+      setBenchmark(await runReplayBenchmark(states));
+    } catch (error) {
+      setBenchmarkError(error instanceof Error ? error.message : "Benchmark failed");
+    } finally {
+      setBenchmarkBusy(false);
+    }
+  }, []);
+
   const setMode = useCallback((mode: GameMode) => {
     engineRef.current?.dispatch({ type: "SET_MODE", mode });
     setHumanAction(null);
   }, []);
+
+  useEffect(() => {
+    if (!gameState || gameState.status !== "game_over") return;
+    const engine = engineRef.current;
+    const mgr = decisionRef.current;
+    if (!engine || !mgr) return;
+    const session = engine.getSessionId();
+    if (recordedSessionRef.current === session) return;
+    const pilot = pilotRef.current;
+    if (pilot !== "jev" && pilot !== "openai") return;
+    recordedSessionRef.current = session;
+    setFlightResults((current) => ({
+      ...current,
+      [pilot]: summarizeFlight({
+        provider: pilot,
+        score: gameState.score,
+        survivalMs: gameState.elapsedMs,
+        samples: mgr.getFlightSamples(),
+      }),
+    }));
+  }, [gameState]);
 
   const start = useCallback(() => {
     engineRef.current?.dispatch({ type: "START" });
@@ -297,5 +389,12 @@ export function useFlightGame() {
     flap,
     runLabDecision,
     localModel,
+    selectPilot,
+    pilot: runtime.decisionProvider,
+    flightResults,
+    benchmark,
+    benchmarkBusy,
+    benchmarkError,
+    runBenchmark,
   };
 }

@@ -88,6 +88,7 @@ export class GameEngine {
   dispatch(action: GameAction): void {
     switch (action.type) {
       case "START":
+        if (this.state.mode === "compare") break;
         if (this.state.status === "idle" || this.state.status === "game_over") {
           this.reset(this.state.mode, true);
         } else if (this.state.status === "paused" && this.state.mode !== "lab") {
@@ -108,7 +109,7 @@ export class GameEngine {
         }
         break;
       case "RESUME":
-        if (this.state.status === "paused" && this.state.mode !== "lab") {
+        if (this.state.status === "paused" && this.state.mode !== "lab" && this.state.mode !== "compare") {
           this.state.status = "running";
         }
         break;
@@ -125,6 +126,8 @@ export class GameEngine {
         this.reset(mode, false);
       }
       this.state.status = "paused";
+    } else if (mode === "compare") {
+      if (this.state.status === "running") this.state.status = "paused";
     } else if (this.state.status === "paused") {
       this.state.status = "running";
     }
@@ -138,7 +141,7 @@ export class GameEngine {
       if (this.state.mode !== "manual") return;
     }
     if (this.state.status === "game_over") return;
-    if (this.state.mode === "lab") return;
+    if (this.state.mode === "lab" || this.state.mode === "compare") return;
     if (this.state.mode === "autopilot" && !fromAutopilot) return;
     if (this.state.status === "paused") {
       this.state.status = "running";
@@ -161,7 +164,7 @@ export class GameEngine {
     this.state = this.createInitialState(canvasWidth, canvasHeight, mode, bestScore);
     this.particles = [];
     this.simTime = 0;
-    if (mode === "lab") {
+    if (mode === "lab" || mode === "compare") {
       this.state.status = "paused";
     } else if (startRunning) {
       this.state.status = "running";
